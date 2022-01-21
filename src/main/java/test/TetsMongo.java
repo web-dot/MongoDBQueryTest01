@@ -1,5 +1,10 @@
 package test;
 
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Projections.excludeId;
+import static com.mongodb.client.model.Projections.fields;
+import static com.mongodb.client.model.Projections.include;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,8 +17,6 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
-
-import static com.mongodb.client.model.Filters.eq;
 
 
 public class TetsMongo {
@@ -107,6 +110,8 @@ public class TetsMongo {
 		
 		System.out.println();
 		//Projections-------------->
+		
+		//using Document
 		Document DFilter2 = new Document("coach", "Mahela Jaywardene");
 		Document DProjResult = collection.find(DFilter2)
 										.limit(1)
@@ -117,7 +122,30 @@ public class TetsMongo {
 		
 		System.out.println(DProjResult.getString("city"));
 		System.out.println(DProjResult.getString("name"));
-		System.out.println(DProjResult.getString("label"));
+		System.out.println(DProjResult.getString("label")); //returns null as not projected
+		
+		
+		//using Bson Document
+		Bson BFilter2 = eq("coach", "Mahela Jaywardene");
+		Document BProjResult = (Document)collection.find(BFilter2)
+											.limit(1)
+											.projection(fields(include("city","name")
+													))
+											.iterator()
+											.tryNext();
+		
+		System.out.println(BProjResult.keySet().containsAll(Arrays.asList("_id", "city", "name")));
+		
+		
+		
+		//excludeId()------->
+		
+		Document BProjExcludeId =   collection.find(BFilter2)
+	            								.limit(1)
+	            								.projection(fields(include("title", "year"), excludeId()))
+	            								.iterator()
+	            								.tryNext();
+		
 		
 		
 		
